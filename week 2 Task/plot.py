@@ -6,12 +6,13 @@ import numpy as np
 import seaborn as sns
 import datetime
 import os
+# from urllib import urlretrieve
 import warnings
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Students Dropout Risks", page_icon=":bar_chart:",layout="wide")
 st.title(" :bar_chart: Students Dropout Risk EDA")
-st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
+st.markdown('<style>div.block-container{padding-top:2rem;}</style>',unsafe_allow_html=True)
 
 f1= st.file_uploader(":file_folder: Upload a file",type=(["csv","txt","xlsx","xls"]))
 if f1 is not None:
@@ -19,8 +20,10 @@ if f1 is not None:
     st.write(filename)
     df=pd.read_csv(filename) 
 else:
-    os.chdir(r'C:/Users/USER/OneDrive/Desktop/3signet/week 2 Task')
+    # os.chdir(r"C:/Users/USER/OneDrive/Desktop/3signet/week 2 Task")
+    
     df = pd.read_csv("updated_data.csv")
+
 # dict = {'Histogram':'histogram','Box plot':'box', 'Bar Chart':'bar', 'Scatter Plot':'scatter'}
 plots = ['Histogram','Box plot', 'Bar Chart']
 numeric = ['Age at enrollment', 'Average curricular units grade','Unemployment rate','Inflation rate','GDP','Previous qualification (grade)','Admission grade','Curricular units 1st sem (grade)','Curricular units 2nd sem (grade)']
@@ -128,6 +131,5 @@ for c in category:
                          width=600,
                      height=400,)
         st.plotly_chart(fig,use_container_width=True, height=200)
-
 
 
