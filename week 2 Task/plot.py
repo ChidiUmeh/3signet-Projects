@@ -3,7 +3,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-import seaborn as sns
 import datetime
 import warnings
 warnings.filterwarnings('ignore')
@@ -38,7 +37,7 @@ col1, col2, col3,col4= st.columns(4)
 
 
 
-st.sidebar.header('Select your Filter (You can only select Numerical column with Histogram or Boxplot OR Categorical column with Bar chart ): ')
+st.sidebar.header('Select your Filter: ')
 # Create for target
 num = st.sidebar.multiselect('Select the Numerical column to view: ', numeric)
 if not num:
