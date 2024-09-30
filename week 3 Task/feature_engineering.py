@@ -22,8 +22,7 @@ def plot(df):
     fig =  plt.figure()
     sns.pairplot(df)
     return fig
-f = plot(df)
-plt.show()
+
 
 # Polynomial Features
 def poly(df, num):
