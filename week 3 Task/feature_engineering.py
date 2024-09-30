@@ -11,6 +11,7 @@ from sklearn.manifold import TSNE
 import pandas as pd
 import numpy as np
 
+df =pd.read_csv('cleaned_data.csv')
 # Feature creation
 def create(df, col1, col2, new_col):
     df[new_col] = df[col1] + df[col2]
@@ -18,8 +19,11 @@ def create(df, col1, col2, new_col):
 
 # Feature interaction
 def plot(df):
+    fig =  plt.figure()
     sns.pairplot(df)
-    plt.show()
+    return fig
+f = plot(df)
+plt.show()
 
 # Polynomial Features
 def poly(df, num):
@@ -35,6 +39,7 @@ def transform(df, num):
 def bin(df, num, bins, labels):
     df[num] = pd.cut(df[num],bins=bins, labels=labels)
     return df[num]
+
 def scale(df, num):
     scaler = MinMaxScaler()
     df[num] = scaler.fit_transform(df[num])
@@ -102,6 +107,6 @@ def select_feature5(df, target):
     fig = plt.figure(figsize=(10,10))
     plt.scatter(tsne_df[:,0],tsne_df[:,1],c=y)
     plt.legend()
-    return plt
+    return fig
 
 
