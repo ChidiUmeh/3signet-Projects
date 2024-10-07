@@ -41,25 +41,14 @@ class ModelDevelopmentPipeline:
         best_model.fit(self.X_train, self.y_train)
         train_pred = best_model.predict(self.X_train)
         test_pred = best_model.predict(self.X_test)
-        test_pred_proba = best_model.predict_proba(self.X_test)[:, 1]
 
         # Evaluation metrics
         print(f"{model_name} training accuracy: {accuracy_score(train_pred, self.y_train)}")
         print(f"{model_name} testing accuracy: {accuracy_score(test_pred, self.y_test)}")
-        self.plot_roc_curve(self.y_test, test_pred_proba, model_name)
         self.print_classification_report(test_pred)
 
         return best_model
 
-    def plot_roc_curve(self, y_test, pred_proba, model_name):
-        fpr, tpr, _ = roc_curve(y_test, pred_proba)
-        plt.plot([0, 1], [0, 1], 'k--')
-        plt.plot(fpr, tpr)
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title(f'{model_name} ROC curve')
-        plt.show()
-        print(f"ROC AUC score: {roc_auc_score(y_test, pred_proba)}")
 
     def print_classification_report(self, predictions):
         print("Confusion matrix:\n", confusion_matrix(self.y_test, predictions))
@@ -109,7 +98,7 @@ def main():
 
     # Support Vector Machine
     svm_params = {
-        'kernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
+        'kernel': ['linear','rbf', 'sigmoid'],
         'gamma': ['scale', 'auto'],
         'C': np.arange(1, 10, 1),
         'class_weight': ['dict', 'balanced']
@@ -140,8 +129,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
