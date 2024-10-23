@@ -1,111 +1,107 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.feature_selection import RFE
-from sklearn.linear_model import Ridge
-from sklearn.manifold import TSNE
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
-df =pd.read_csv('cleaned_data.csv')
-# Feature creation
-def create(df, col1, col2, new_col):
-    df[new_col] = df[col1] + df[col2]
-    return df[new_col]
+class FeatureEngineering:
+    def __init__(self, data):
+        self.data = data
 
-# Feature interaction
-def plot(df):
-    fig =  plt.figure()
-    sns.pairplot(df)
-    return fig
+    def preprocess_data(self):
+        # Feature Engineering
+        self.data['Curricular units (Average grade)'] = (
+            (self.data['Curricular units 1st sem (grade)'] + 
+             self.data['Curricular units 2nd sem (grade)']) / 2
+        )
+        self.data['Total Curricular units (enrolled)'] = (
+            self.data['Curricular units 1st sem (enrolled)'] + 
+            self.data['Curricular units 2nd sem (enrolled)']
+        )
+        self.data['Total Curricular units (evaluations)'] = (
+            self.data['Curricular units 1st sem (evaluations)'] + 
+            self.data['Curricular units 2nd sem (evaluations)']
+        )
+        self.data['Total Curricular units (approved)'] = (
+            self.data['Curricular units 1st sem (approved)'] + 
+            self.data['Curricular units 2nd sem (approved)']
+        )
+        self.data['Completion_Rate_1st'] = (
+            self.data['Curricular units 1st sem (approved)'] / 
+            self.data['Curricular units 1st sem (enrolled)']
+        )
+        self.data['Completion_Rate_2nd'] = (
+            self.data['Curricular units 2nd sem (approved)'] / 
+            self.data['Curricular units 2nd sem (enrolled)']
+        )
 
+        # Interaction Features
+        self.data['Completion_Grade_Interaction'] = (
+            self.data['Completion_Rate_1st'] * self.data['Admission grade']
+        )
+        self.data['Completion_Age_Interaction'] = (
+            self.data['Completion_Rate_1st'] * self.data['Age at enrollment']
+        )
+        self.data['Grade_Interaction'] = (
+            self.data['Admission grade'] * self.data['Previous qualification (grade)']
+        )
+        self.data['Previous_Age_Interaction'] = (
+            self.data['Previous qualification (grade)'] * self.data['Age at enrollment']
+        )
 
-# Polynomial Features
-def poly(df, num):
-    poly = PolynomialFeatures(degree=3,interaction_only=True)
-    return poly.fit_transform(df[num].values)
+        # Grouping Age
+        self.data['Age_cut'] = pd.qcut(self.data['Age at enrollment'], 6)
+        self.data['Grouped Age at enrollment'] = pd.qcut(
+            self.data['Age at enrollment'], q=6, labels=[1, 2, 3, 4, 5, 6]
+        )
 
-# Feature Transformation
-def transform(df, num):
-    for n in num:
-        df[n]=np.log10(df[n]+1)
-        return df[n]
+        # Log transformation for skewed data
+        skew_data = [
+            'Curricular units 1st sem (enrolled)', 'Curricular units 1st sem (evaluations)',
+            'Curricular units 1st sem (approved)', 'Curricular units 2nd sem (enrolled)',
+            'Curricular units 2nd sem (evaluations)', 'Curricular units 2nd sem (approved)',
+            'Completion_Rate_2nd', 'Completion_Rate_1st', 
+            'Total Curricular units (approved)', 'Total Curricular units (evaluations)',
+            'Total Curricular units (enrolled)', 'Curricular units (Average grade)', 
+            'Completion_Grade_Interaction', 'Completion_Age_Interaction', 
+            'Grade_Interaction', 'Previous_Age_Interaction'
+        ]
 
-def bin(df, num, bins, labels):
-    df[num] = pd.cut(df[num],bins=bins, labels=labels)
-    return df[num]
+        for var in skew_data:
+            self.data[var] = np.log(self.data[var] + 1)
 
-def scale(df, num):
-    scaler = MinMaxScaler()
-    df[num] = scaler.fit_transform(df[num])
-    return df[num]
+        # Standardize numeric features
+        numeric_features = [
+            'Age at enrollment', 'Previous qualification (grade)', 'Admission grade',
+            'Curricular units 1st sem (enrolled)', 'Curricular units 1st sem (evaluations)',
+            'Curricular units 1st sem (approved)', 'Curricular units 1st sem (grade)',
+            'Curricular units 2nd sem (enrolled)', 'Curricular units 2nd sem (evaluations)',
+            'Curricular units 2nd sem (approved)', 'Curricular units 2nd sem (grade)',
+            'Unemployment rate', 'Inflation rate', 'GDP', 'Completion_Rate_2nd',
+            'Completion_Rate_1st', 'Total Curricular units (approved)',
+            'Total Curricular units (evaluated)', 'Total Curricular units (enrolled)',
+            'Curricular units (Average grade)', 'Completion_Grade_Interaction', 
+            'Completion_Age_Interaction', 'Grade_Interaction', 'Previous_Age_Interaction'
+        ]
 
-# Feature selection
-def select_feature1(df, target):
-    X_columns = df.drop(target, axis=1).columns
-    X= df.drop(target,axis=1).values
-    y= df[target].values
-    test = SelectKBest(score_func=chi2, k=10)
-    fit = test.fit(X, y)
-    # Summarize scores
-    np.set_printoptions(precision=3)
-    print(fit.scores_)
+        scaler = StandardScaler()
+        self.data[numeric_features] = scaler.fit_transform(self.data[numeric_features])
 
-    features = fit.transform(X)
-    # Summarize selected features
-    return features[0:5,:]
-
-# Feature extraction
-def select_feature2(df, target):
-    X_columns = df.drop(target, axis=1).columns
-    X= df.drop(target,axis=1).values
-    y= df[target].values
-    model = DecisionTreeClassifier()
-    rfe = RFE(estimator=model, n_features_to_select=10)
-    fit = rfe.fit(X, y)
-    important_features = pd.DataFrame(list(zip(X_columns,fit.support_)),columns=['Feature','Important'])
-    return important_features.sort_values(by='Important', ascending=False)
-
-def select_feature3(df, target):
-    X_columns = df.drop(target, axis=1).columns
-    X= df.drop(target,axis=1).values
-    y= df[target].values
-    ridge = Ridge(alpha=1.0)
-    ridge.fit(X,y)
-    Ridge(alpha=1.0, copy_X=True, fit_intercept=True, max_iter=None, random_state=None, solver='auto', tol=0.001)
-    # A helper method for pretty-printing the coefficients
-    def pretty_print_coefs(coefs, names = None, sort = False):
-        if names == None:
-            names = ["X%s" % x for x in range(len(coefs))]
-            lst = zip(coefs, names)
-            if sort:
-               lst = sorted(lst,  key = lambda x:-np.abs(x[0]))
-        return " + ".join("%s * %s" % (round(coef, 3), name)
-                                   for coef, name in lst)
-    print ("Ridge model:", pretty_print_coefs(ridge.coef_))
-
-def select_feature4(df, target):
-    from sklearn.decomposition import PCA
-    X_columns = df.drop(target, axis=1).columns
-    X= df.drop(target,axis=1).values
-    y= df[target].values
-    pca = PCA(10)
-    pca.fit_transform(X)
-    return pca.n_components_, pca.explained_variance_ratio_
-
-def select_feature5(df, target):
-    X_columns = df.drop(target, axis=1).columns
-    X= df.drop(target,axis=1).values
-    y= df[target].values
-    tsne =TSNE(n_components=2,perplexity=20,random_state=42)
-    tsne_df = tsne.fit_transform(X)
-    fig = plt.figure(figsize=(10,10))
-    plt.scatter(tsne_df[:,0],tsne_df[:,1],c=y)
-    plt.legend()
-    return fig
+    def get_processed_data(self):
+        return self.data
 
 
+# Example usage
+if __name__ == "__main__":
+    # Load new data
+    new_data_path = 'path_to_new_data.csv'  # Replace with your actual path
+    new_data = pd.read_csv(new_data_path)
+
+    # Initialize feature engineering
+    feature_engineering = FeatureEngineering(new_data)
+    feature_engineering.preprocess_data()
+
+    # Get processed data
+    processed_data = feature_engineering.get_processed_data()
+    
+    # Save processed data to CSV
+    processed_data.to_csv('processed_new_data.csv', index=False)
+    print("Feature engineering completed. Processed data saved to 'processed_new_data.csv'.")
