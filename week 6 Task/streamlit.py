@@ -1,17 +1,17 @@
 import torch
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder, 
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 import streamlit as st
 from app import make_prediction
 import pandas as pd
 school_df= pd.read_csv('../week 1 task/cleaned_data.csv', index_col=0)
 
 
-fath_qual =  [3,4,37,1,2,38,'others']
-moth_qual = [1,2,3,12,19,37,34,'others' ]
-moth_occ= [4,'others']
-fath_occ=  [ 9,0,90, "others"]
+Fath_qual =  [3,4,37,1,2,38,'others']
+Moth_qual = [1,2,3,12,19,37,34,'others' ]
+Moth_occ= [4,'others']
+Fath_occ=  [ 9,0,90, "others"]
 Application_mode = [7,51,17,39,'others' ]
-course =[9130,9119, 9003, 33,9085, 9070,9556, 9500, 9670,
+Course =[9130,9119, 9003, 33,9085, 9070,9556, 9500, 9670,
        9773, 9853,9238,  9254, 9147,8014, 9991]
 Marital_status = ['Yes','No']
 International = ['Yes','No']
@@ -42,34 +42,65 @@ def main():
     marital_status=st.sidebar.multiselect('Marital status',Marital_status)
     international=st.sidebar.multiselect('International',International)
     app_mode = st.sidebar.multiselect("Application mode",Application_mode)
-    course=st.sidebar.multiselect('Course',course)
-    fath_qual = st.sidebar.multiselect("Father's qualification",fath_qual)
-    moth_qual=st.sidebar.multiselect("Mother's qualification",moth_qual)
-    fath_occ=st.sidebar.multiselect("Father's occupation",fath_occ)
-    moth_occ = st.sidebar.multiselect("Mother's occupation",moth_occ)
-    Completion_Age_Interaction =Completion_Rate_1st*enrollment_age
-    Completion_Grade_Interaction=Completion_Rate_1st*admission_grade
-    Completion_Rate_1st = approved_first/enrolled_first
-    Completion_Rate_2nd = approved_second/enrolled_second
-    Curricular_units_Average_grade =(grade_first + grade_second)/2
-    Grade_Interaction =admission_grade*prev_qual_grade
-    Previous_Age_Interaction=prev_qual_grade*enrollment_age
-    Total_Curricular_units_approved= approved_first+approved_second
-    Total_Curricular_units_enrolled= enrolled_first+enrolled_second
-    Total_Curricular_units_evaluations= evaluations_first+evaluations_second
+    course=st.sidebar.multiselect('Course', Course)
+    fath_qual = st.sidebar.multiselect("Father's qualification",Fath_qual)
+    moth_qual=st.sidebar.multiselect("Mother's qualification",Moth_qual)
+    fath_occ=st.sidebar.multiselect("Father's occupation",Fath_occ)
+    moth_occ = st.sidebar.multiselect("Mother's occupation",Moth_occ)
 
-    if enrollment_age ==18:
-        AdmGrades_category = 1
-    elif enrollment_age st.sidebar.multiselect("Choose:" 1: "Below 18", 2: "18-19 ",
-                                                3: "19-20",
-                                                4: "21-22", 
-                                                5: "23-30", 
-                                                6: "Above 30",moth_occ)
-    Grouped_Admission_grade=
-    Grouped_Age_at_enrollment=
-    Grouped_Curricular_units_1st_sem_grade=
-    Grouped_Curricular_units_2nd_sem_grade=
-    Grouped_Previous_qualification_grade=
+
+
+
+
+
+
+    # Completion_Age_Interaction =Completion_Rate_1st*enrollment_age
+    # Completion_Grade_Interaction=Completion_Rate_1st*admission_grade
+    # Completion_Rate_1st = approved_first/enrolled_first
+    # Completion_Rate_2nd = approved_second/enrolled_second
+    # Curricular_units_Average_grade =(grade_first + grade_second)/2
+    # Grade_Interaction =admission_grade*prev_qual_grade
+    # Previous_Age_Interaction=prev_qual_grade*enrollment_age
+    # Total_Curricular_units_approved= approved_first+approved_second
+    # Total_Curricular_units_enrolled= enrolled_first+enrolled_second
+    # Total_Curricular_units_evaluations= evaluations_first+evaluations_second
+
+    # if enrollment_age ==18:
+    #     AdmGrades_category = 1
+    # elif enrollment_age >18 and enrollment_age <= 19:
+    #     AdmGrades_category = 2
+    # elif enrollment_age >19 and enrollment_age <= 20:
+    #     AdmGrades_category = 3
+    # elif enrollment_age >20 and enrollment_age <= 22:
+    #     AdmGrades_category = 4
+    # elif enrollment_age >22 and enrollment_age <= 30:
+    #     AdmGrades_category = 5
+    # elif enrollment_age >30 and enrollment_age <= 70:
+    #     AdmGrades_category = 6
+
+    if st.button('Predict'):
+        y_pred = make_prediction([grade_first,grade_second])
+        st.success('Good!!!')
+        return y_pred
+
+if __name__ =="__main__":
+    main()
+
+
+            # Grouped_Admission_grade=
+
+
+
+    # Grouped_Age_at_enrollment=
+
+
+    # Grouped_Curricular_units_1st_sem_grade=
+
+
+    # Grouped_Curricular_units_2nd_sem_grade=
+
+    
+    # Grouped_Previous_qualification_grade=
 
 
 
@@ -93,9 +124,9 @@ def main():
        
        
 
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-school_df[numeric] = scaler.fit_transform(school_df[numeric])
+# from sklearn.preprocessing import StandardScaler
+# scaler = StandardScaler()
+# school_df[numeric] = scaler.fit_transform(school_df[numeric])
 
 
 

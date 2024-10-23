@@ -29,9 +29,11 @@ def load_model():
     new_model.eval()
     return new_model
 
-def make_prediction(new_model, input_data):
-    input_tensor = torch.tensor(input_data, dtype=torch.float32)
-    with torch.no_grad():  
-        output = new_model.forward(input_tensor)
-    return output.argmax().item()
+new_model =load_model()
+
+def make_prediction(input_data,model=new_model, ):
+    input_tensor = torch.tensor(input_data, dtype=torch.float32)  # Convert input to tensor
+    with torch.no_grad():  # Disable gradient calculation
+        output = model(input_tensor)
+    return output.numpy()
 
